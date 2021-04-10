@@ -22,6 +22,8 @@
 
     - set_fact:
         join_command: "{{ jointoken }}"
+    - debug:
+        msg: "{{hostvars[groups['tag_Name_kube_master'][0]]['join_command']['stdout']}}"
 
 - hosts: tag_Name_kube_slave
   remote_user: ec2-user
@@ -29,8 +31,9 @@
   become_user: root
   collections: 
     - smc181002.k8s
-  roles:
-    - role: slave
-      vars:
-        join_command: '{{hostvars.tag_Name_kube_master.join_command}}'
-
+  tasks: 
+    - name: slave config
+      include_role:
+        name: slave
+      vars: 
+        join_command: "{{hostvars[groups['tag_Name_kube_master'][0]]['join_command']['stdout']}}"

@@ -1,0 +1,22 @@
+- hosts: localhost
+  collections:
+    - smc181002.k8s
+  tasks:
+    - name: launch nodes
+      include_role:
+        name: provision
+      vars:
+        key_name: mypem11
+        sec_grp: allow-all
+        ami_id: ami-0bcf5425cdc1d8a85
+        os_type: t2.micro
+
+    - set_fact:
+        instances: "{{ kube_ec2_master.instances + kube_ec2_slave.instances }}"
+
+    - name: wait for ssh to start
+      wait_for:
+        host: "{{item.public_dns_name}}"
+        port: 22
+        state: started
+      loop: "{{instances}}"
