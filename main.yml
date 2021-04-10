@@ -1,0 +1,36 @@
+- hosts: tag_App_kube
+  remote_user: ec2-user
+  become: yes
+  become_user: root
+  collections: 
+    - smc181002.k8s
+  roles:
+    - common
+
+- hosts: tag_Name_kube_master
+  remote_user: ec2-user
+  become: yes
+  become_user: root
+  collections: 
+    - smc181002.k8s
+  tasks:
+    - name: run master role
+      include_role:
+        name: master
+      vars: 
+        net_name: "10.240.0.0/16"
+
+    - set_fact:
+        join_command: "{{ jointoken }}"
+
+- hosts: tag_Name_kube_slave
+  remote_user: ec2-user
+  become: yes
+  become_user: root
+  collections: 
+    - smc181002.k8s
+  roles:
+    - role: slave
+      vars:
+        join_command: '{{hostvars.tag_Name_kube_master.join_command}}'
+

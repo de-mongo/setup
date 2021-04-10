@@ -1,0 +1,5 @@
+- hosts: localhost
+  collections:
+    - smc181002.k8s
+  roles:
+    - provision
