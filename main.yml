@@ -1,5 +1,5 @@
 - hosts: tag_App_kube
-  remote_user: ec2-user
+  remote_user: admin
   become: yes
   become_user: root
   collections: 
@@ -8,7 +8,7 @@
     - common
 
 - hosts: tag_Name_kube_master
-  remote_user: ec2-user
+  remote_user: admin
   become: yes
   become_user: root
   collections: 
@@ -26,7 +26,7 @@
         msg: "{{hostvars[groups['tag_Name_kube_master'][0]]['join_command']['stdout']}}"
 
 - hosts: tag_Name_kube_slave
-  remote_user: ec2-user
+  remote_user: admin
   become: yes
   become_user: root
   collections: 

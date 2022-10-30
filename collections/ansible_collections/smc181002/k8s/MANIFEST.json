@@ -1,0 +1,36 @@
+{
+ "collection_info": {
+  "namespace": "smc181002",
+  "name": "k8s",
+  "version": "1.1.0",
+  "authors": [
+   "Meher Chaitanya <meherchaitanya18802@gmail.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "kubernetes",
+   "aws",
+   "ubuntu",
+   "amazonlinux",
+   "debian"
+  ],
+  "description": "To lauch k8s cluster on aws ec2",
+  "license": [
+   "MIT"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "https://github.com/smc181002/k8s",
+  "documentation": "https://github.com/smc181002/k8s/tree/master/docs",
+  "homepage": "https://github.com/smc181002/k8s/README.md",
+  "issues": "https://github.com/smc181002/k8s/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "7d39360fa260f1a72aea027d7f9d5e7838a2f9e5fdb8afbe6f3c4b0f45fd5642",
+  "format": 1
+ },
+ "format": 1
+}

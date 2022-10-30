@@ -1,0 +1,85 @@
+---
+# tasks file for common
+
+- name: Copy kubernetes repo file [RedHat Family]
+  copy:
+    src: kubernetes.repo
+    dest: /etc/yum.repos.d/
+  when: ansible_facts.os_family == 'RedHat'
+
+- name: "Add Kubernetes apt-key [Debian Family]"
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: "present"
+  when: ansible_facts.os_family == 'Debian'
+
+- name: "Add Kubernetes apt repo [Debian Family]"
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: "present"
+    filename: "kubernetes"
+  when: ansible_facts.os_family == 'Debian'
+
+- name: "Install APT Transport HTTPS [Debian Family]"
+  apt:
+    name: 
+      - "apt-transport-https"
+      - ca-certificates
+    state: "present"
+    update_cache: true
+  when: ansible_facts.os_family == 'Debian'
+
+- name: "Docker Installation [Debian Family]"
+  apt:
+    name: "docker.io"
+    state: "present"
+  when: ansible_facts.os_family == 'Debian'
+
+- name: install container engine [docker] and iproute-tc [AmazonLinux]
+  package: 
+    name: 
+      - docker
+      - iproute-tc
+    state: present
+  when: ansible_facts.distribution == 'Amazon'
+
+- name: start the container engine
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: change the cgroup driver to systemd
+  copy:
+    src: daemon.json
+    dest: /etc/docker/
+  notify: restart docker
+
+- name: Install kubectl, kubelet, kubeadm programs [RedHat Family]
+  yum:
+    name:
+      - kubectl
+      - kubelet
+      - kubeadm
+    state: present
+    disable_excludes: kubernetes
+  when: ansible_facts.os_family == 'RedHat'
+
+- name: Install kubectl, kubelet, kubeadm programs [Debian Family]
+  apt:
+    name:
+      - kubectl
+      - kubelet
+      - kubeadm
+    state: present
+  when: ansible_facts.os_family == 'Debian'
+
+- name: enable bridging in iptables
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+
+- name: enable bridging in ip6tables
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: '1'

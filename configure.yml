@@ -1,0 +1,74 @@
+- hosts: tag_Name_kube_master
+  remote_user: ec2-user
+  vars:
+    shard_count: 2
+    config_svr_count: 3
+    shard_svr_count: 3
+    mongodb_name: sharded-cluster
+  # become: yes
+  # become_user: root
+  tasks:
+    - name: Create .kube 
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+    - name: Install pyyaml
+      ansible.builtin.pip: 
+        name: pyyaml
+
+    - name: Copy .kube/config from root to user
+      ansible.builtin.copy:
+        src: "/root/.kube"
+        dest: "/home/{{ ansible_user_id }}"
+        remote_src: yes
+      become: yes
+      become_user: root
+
+    - name: Change .kube permissions
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ ansible_effective_user_id }}"
+        group: "{{ ansible_effective_group_id }}"
+      become: yes
+      become_user: root
+
+    - name: Install helm
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: /tmp/get_helm.sh
+        mode: '0700'
+
+    - name: Run helm installation script
+      ansible.builtin.shell: /tmp/get_helm.sh
+
+    - kubernetes.core.helm_repository:
+        name: openebs
+        repo_url: https://openebs.github.io/charts
+
+    - name: Install openebs
+      kubernetes.core.helm:
+        name: openebs
+        chart_ref: openebs/openebs
+        release_namespace: openebs
+        create_namespace: true
+
+    - kubernetes.core.helm_repository:
+        name: bitnami
+        repo_url: https://charts.bitnami.com/bitnami
+
+    - name: Install Mongodb Sharded cluster
+      kubernetes.core.helm:
+        name: "{{ mongodb_name }}"
+        chart_ref: bitnami/mongodb-sharded
+        release_namespace: mongodb
+        create_namespace: true
+        values:
+          global:
+            storageClass: openebs-hostpath
+          shards: "{{ shard_count }}"
+          configsvr:
+            replicaCount: "{{ config_svr_count }}"
+          shardsvr:
+            dataNode:
+              replicaCount: "{{ shard_svr_count }}"
+
